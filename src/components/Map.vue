@@ -1,233 +1,304 @@
 <template>
   <div >
-<!--    <object data="cameroon-details.svg"/>-->
-    <div style="display: block; padding: 1% 2.5%;
-      float: left; width: 65%; text-align: left; " >
-      <h1 style="font-family: 'Montserrat SemiBold' ">{{ region }}</h1>
-      <ul>
-        <li v-for="item in vectors" :key="item.type.name" style="display: block; padding: 8px">
-          <label style="font-size: 0.90em;
-                  font-family: 'Montserrat SemiBold'">{{item.type.name}}</label>
-          <div id="tooltip" display="none" style="position: absolute; display: none;"></div>
-          <div v-if="item.graphic_type.id === 1" @mousemove="handleStateHover" @mouseout="handleStateLeave"
-               @click="handleStateClick" id="svg-div" v-html="item.svg" style="text-align: center; display: inline-block;
-            float: left"/>
-
-          <div v-if="item.graphic_type.id === 2" style="text-align: center; display: inline-block;
-            float: left">
-            <img  style="width: 80%;" v-bind:src="'http://localhost:8000'+ item.svg"/>
-          </div>
-
-        </li>
+    <div style="height: 80px; width: 100%; background: white; margin: 0px; text-align: left">
+      <a v-if="show_return === true" href="#" style="padding-left: 20px; padding-top: 30px; float: left;" >
+        <img  @click="getZone(null, null,1)" height="20px" src="arrow.png"/></a>
+      <label style="font-family: 'Oswald'; padding-left: 20px; padding-top: 30px; font-size: 20px;
+        float: left">Residat - {{ region }}</label>
+      <ul style="float: right; list-style: none; vertical-align: middle; margin: 0; margin-top: 30px">
+        <li><a href="#" style="text-decoration: none">Climatic Hazard</a></li>
+        <li><a href="#" style="text-decoration: none">Location</a></li>
+        <li><a href="#" style="text-decoration: none">Images</a></li>
+        <li><a href="#" style="text-decoration: none">Additional Data</a></li>
+        <li><a href="#" style="text-decoration: none">Contact</a></li>
       </ul>
+    </div>
+    <div  class="map_content" >
 
-<!--      <img alt="Vue logo" src="assets/logo.png">-->
-      <div style=" display: inline-block; float: left; min-height: 100px; text-align: left">
+      <div class="key" style="">
         <ul style="display: inline-block; float: left">
-          <h5>Key</h5>
-          <li v-for="item in show_items" :key="item.name" style="display: block; padding: 8px">
-            <div style="width: 10px; display: inline-block; margin-right: 10px; height: 10px; "
-                 :style="{'background-color' : item.color }"></div><label style="font-size: 0.70em;
+          <h4>Keys</h4>
+          <li v-for="item in this.mapKeys" :key="item.name" style="display: block; padding: 8px" >
+            <div  v-if="item.map_key_type_id === 1" style="width: 10px; display: inline-block;
+             margin-right: 10px; height: 10px; " :style="{'background-color' : item.color }"></div>
+            <div  v-if="item.map_key_type_id === 2 && item.map_key_size_id === 1"
+                  style="width: 15px; display: inline-block; border-radius: 50%;
+             margin-right: 10px; height: 15px; " :style="{'background-color' : item.color }"></div>
+            <div  v-if="item.map_key_type_id === 2 && item.map_key_size_id === 2"
+                  style="width: 12.5px; display: inline-block; border-radius: 50%;
+             margin-right: 10px; height: 12.5px; " :style="{'background-color' : item.color }"></div>
+            <div  v-if="item.map_key_type_id === 2 && item.map_key_size_id === 3"
+                  style="width: 10px; display: inline-block; border-radius: 50%;
+             margin-right: 10px; height: 10px; " :style="{'background-color' : item.color }"></div>
+            <div  v-if="item.map_key_type_id === 2 && item.map_key_size_id === 4"
+                  style="width: 7.5px; display: inline-block; border-radius: 50%;
+             margin-right: 10px; height: 7.5px; " :style="{'background-color' : item.color }"></div>
+            <label style="font-size: 0.70em;
                   font-family: 'Montserrat SemiBold'">{{item.name}}</label>
           </li>
         </ul>
-        <div  style=" float: left ; display: inline-block" >
-          <img @click="getZone(null, null)" style="height: 200px;" v-bind:src="'http://localhost:8000'+  this.zone.image"/>
-        </div>
+        <!--Zone to display image of previous elt in the layout-->
+<!--        <div  style=" float: left ; display: inline-block" >-->
+<!--          <img @click="getZone(null, null)" style="height: 200px;" v-bind:src="'https://api.residat.com'+  this.zone.image"/>-->
+<!--        </div>-->
       </div>
 
+      <div class="map" style="" >
+        <ul>
+          <li v-for="item in vectors" :key="item.type.name" style="display: block; padding: 8px">
+            <label style="font-size: 0.90em; display: block;
+                  font-family: 'Montserrat SemiBold'">{{item.type.name}}</label>
+            <div id="tooltip" display="none" style="position: absolute; display: none;"></div>
+            <div v-if="item.graphic_type.id === 1"  style="text-align: center;  display: inline-block;"/>
+              <inline-svg
+                :src="'http://localhost:8080/'+ item.path"
+                viewBox="0 0 1000 1500"
+                @mousemove="handleStateHover"
+                @mouseout="handleStateLeave"
+                @loaded="svgLoaded"
+                @click="handleStateClick"
+                @unloaded="svgUnloaded"
+                @error="svgLoadError"
+                width="auto"
+                height="auto"
+                fill="black"
+                aria-label="item."
+              ></inline-svg>
+<!--            <inline-svg-->
+<!--              :src="'https://residat.com/'+ item.path"-->
+<!--              viewBox="0 0 1000 1500"-->
+<!--              @mousemove="handleStateHover"-->
+<!--              @mouseout="handleStateLeave"-->
+<!--              @loaded="svgLoaded"-->
+<!--              @click="handleStateClick"-->
+<!--              @unloaded="svgUnloaded"-->
+<!--              @error="svgLoadError"-->
+<!--              width="100%"-->
+<!--              height="auto"-->
+<!--              fill="black"-->
+<!--              aria-label="item."-->
+<!--            ></inline-svg>-->
+<!--            <inline-svg-->
+<!--              src=""-->
+<!--              viewBox="0 0 1000 1500"-->
+<!--              @mousemove="handleStateHover"-->
+<!--              @mouseout="handleStateLeave"-->
+<!--              @loaded="svgLoaded"-->
+<!--              @click="handleStateClick"-->
+<!--              @unloaded="svgUnloaded"-->
+<!--              @error="svgLoadError"-->
+<!--              width="100%"-->
+<!--              height="auto"-->
+<!--              fill="black"-->
+<!--              aria-label="item."-->
+<!--            ></inline-svg>-->
+            <div v-if="item.graphic_type.id === 2" style="text-align: center; display: inline-block;">
+              <img  style="width: 80%;" v-bind:src="'https://api.residat.com/'+ item.svg"/>
+            </div>
+
+          </li>
+        </ul>
+      </div>
+      <div style="clear: both"/>
     </div>
 
-    <div  style="display: block; text-align: left; margin: 0; padding: 2.5%; float: right; width: 30%" v-if="display_chart === false">
-      <h2 style="font-family: 'Montserrat SemiBold' ">Residat</h2>
-      <p style="text-align: justify">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-      </p>
-
-      <p style="text-align: justify">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-      </p>
-
-      <p style="text-align: justify">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-        labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-        commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-      </p>
-    </div>
-
-    <div style="display: block; text-align: left; margin: 0; padding: 2.5%; float: right; width: 30%"
-         v-if="display_chart === true">
-
-<!--      <b-container style="width: 50%; float: left">-->
-<!--        <b-carousel controls indicators fade label-indicators="left right" img-height="300" img-width="400">-->
-<!--          <b-carousel-slide img-src="assets/GOBO-IMACT.png"></b-carousel-slide>-->
-<!--          <b-carousel-slide img-src="assets/GOBO-VUL.png"></b-carousel-slide>-->
-<!--        </b-carousel>-->
-
-<!--      </b-container>-->
-<!--      <ul>-->
-<!--        <li v-for="item in vectors" :key="item.type.name" style="display: block; padding: 8px">-->
-<!--          <label style="font-size: 0.90em;-->
-<!--                  font-family: 'Montserrat SemiBold'">{{item.type.name}}</label>-->
-<!--          <div id="tooltip" display="none" style="position: absolute; display: none;"></div>-->
-<!--          <div @mousemove="handleStateHover" @mouseout="handleStateLeave"-->
-<!--               @click="handleStateClick" id="svg-div" v-html="item.svg" style="text-align: center; display: inline-block;-->
-<!--            float: left"/>-->
-<!--        </li>-->
-<!--      </ul>-->
-
-      <b-container style="width: 100%; float: right">
-        <h5>Climate Degree of Impact</h5>
-        <apexchart style="" width="380" type="pie" :options="optionDonuts" :series="serieDonuts"></apexchart>
-        <h5>Climate Hazard Vulnerability Index</h5>
+    <div v-if="display_chart === true" class="data_display">
+      <b-container style="width: 90%; ">
+        <h4>Climate Degree of Impact</h4>
+        <apexchart style="" width="380" type="donut" :options="optionDonuts" :series="serieDonuts"></apexchart>
+        <h4>Climate Hazard Vulnerability Index</h4>
         <apexchart type="bar" height="380" :options="chartOptionsHistogram" :series="seriesHistogram"></apexchart>
-        <h5>Climate Risk Threats</h5>
-        <apexchart type="line" height="350" :options="chartOptions" :series="seriesLine"></apexchart>
+        <h4>Climate Risk Threats</h4>
+        <apexchart type="bar" height="350" :options="chartOptions" :series="seriesLine"></apexchart>
       </b-container>
 
       <div style="clear: both"></div>
-
-
-
     </div>
 
+    <div v-if="display_chart === false" class="data_display">
+      <p style="text-align: justify; padding: 10px;">
+
+        <label style="font-family: 'Montserrat SemiBold'">Residat </label>is an integrated Geospatial web service profiling climate hazards of vulnerable communities in Cameroon. It displays analyzed climate risks data in GIS format and provides climate hazard models that informs risk recommendations for community stakeholders. Its interactive maps serve both as dashboards for forecasting and visualizing updated community climate hazard models and as a data pool for community climate reality. Its integrated SMS and MMS (under development) platform allows subscribers to receive environmental notifications and climate hazard warnings while allowing the user to query visualized data for their subscribed local communities.  This platform is intended to serve as a reference for obtaining reliable community data (data based on administrative sub divisions) to address climate risk in Cameroon and possible beyond. We are prototyping in Mayo-Danay division of the Far North region, Wouri division in Littoral and Noun Division of the West Region of Cameroon. Key technologies involves GIS, Drones and Big data.
+      </p>
+      <div style="width: 50% ; min-height: 100px; background: #7bed9f; text-align: left; color: #000000; padding: 8px;
+          margin-left: 10px; border-radius: 4px" >
+        <h1 style="font-family: 'Open Sans Condensed'; font-size: 50px; display: inline-block; margin: 0; padding-right: 10px">45</h1> <img width="24px" src="increasing.png"/>
+        <br/><label style="font-family: 'Montserrat SemiBold' ; font-size: 0.8em"> Sub Divisions Covered</label>
+      </div>
+      <div style="width: 40% ; display: inline-block; min-height: 100px; background: #ff6b81; text-align: left; color: #000000; padding: 8px;
+              margin-left: 2.5%; margin-top: 16px; border-radius: 4px" >
+        <h1 style="font-family: 'Open Sans Condensed'; font-size: 50px; display: inline-block; margin: 0; padding-right: 10px">41</h1>
+        <img width="24px" src="increasing.png"/>
+        <br/><label style="font-family: 'Montserrat SemiBold' ; font-size: 0.8em">Bush fires</label>
+      </div>
+
+      <div style="width: 40% ; display: inline-block; min-height: 100px; background: #70a1ff; text-align: left; color: #000000; padding: 8px;
+              margin-left: 2.5%; margin-top: 16px; border-radius: 4px" >
+        <h1 style="font-family: 'Open Sans Condensed'; font-size: 50px; display: inline-block; margin: 0; padding-right: 10px">30</h1>
+        <img width="24px" src="increasing.png"/>
+        <br/><label style="font-family: 'Montserrat SemiBold' ; font-size: 0.8em">Floods</label>
+      </div>
+
+      <div style="width: 40% ; display: inline-block; min-height: 100px; background: #ffffff; text-align: left; color: #000000; padding: 8px;
+              margin-left: 2.5%; margin-top: 16px; border-radius: 4px" >
+        <h1 style="font-family: 'Open Sans Condensed'; font-size: 50px; display: inline-block; margin: 0; padding-right: 10px">30</h1>
+        <img width="24px" src="increasing.png"/>
+        <br/><label style="font-family: 'Montserrat SemiBold' ; font-size: 0.8em">Droughts</label>
+      </div>
+
+      <div style="width: 40% ; display: inline-block; min-height: 100px; background: #eccc68; text-align: left; color: #000000; padding: 8px;
+              margin-left: 2.5%; margin-top: 16px; border-radius: 4px" >
+        <h1 style="font-family: 'Open Sans Condensed'; font-size: 50px; display: inline-block; margin: 0; padding-right: 10px">30</h1>
+        <img width="24px" src="decreasing.png"/>
+        <br/><label style="font-family: 'Montserrat SemiBold' ; font-size: 0.8em">Droughts</label>
+      </div>
+    </div>
 
   </div>
 </template>
 
 <script>
 
-import axios from "axios";
+import axios from 'axios'
 
 export default {
   name: 'MapVue',
   props: {
     msg: String
   },
-  methods : {
-    handleStateHover : function (e){
-      if (e.target.tagName === "path"){
-        this.showTooltip(e,e.target.dataset.name);
+  methods: {
+    handleStateHover: function (e) {
+      if (e.target.tagName === 'path') {
+        this.showTooltip(e, e.target.dataset.name)
 
-
-        if(e.target.dataset.active === 'true'){
-          this.color = e.target.style.fill;
-          e.target.style.fill = '#42b983';
+        if (e.target.dataset.active === 'true') {
+          this.color = e.target.style.fill
+          e.target.style.fill = '#42b983'
           e.target.style.strokeWidth = '2px'
           e.target.style.stroke = '#ffffff'
-          this.region = e.target.dataset.name;
+          // this.region = e.target.dataset.name
         }
       }
     },
-    handleStateLeave : function (e){
-      if (e.target.tagName === "path" ){
-        this.hideTooltip();
-        if( (e.target.dataset.active === 'true')){
-
-            e.target.style.fill = this.color;
-            e.target.style.strokeWidth = '0.25px'
-
+    handleStateLeave: function (e) {
+      if (e.target.tagName === 'path') {
+        this.hideTooltip()
+        if ((e.target.dataset.active === 'true')) {
+          e.target.style.fill = this.color
+          e.target.style.strokeWidth = '0.25px'
         }
       }
-
     },
-    handleStateClick : function (e) {
-
-      if (e.target.tagName === "path") {
-        if(e.target.dataset.active === 'true'){
-          console.log('the zone id is '+ this.zone.id + ' the zone name is '+this.zone.name);
-          this.getZone(e.target.dataset.name, this.zone.id);
+    svgLoaded: function (e) {
+      console.log('svg loaded')
+    },
+    svgUnloaded: function (e) {
+      console.log('svg UNloaded')
+    },
+    svgLoadError: function (e) {
+      console.log('svg svgLoadError')
+    },
+    handleStateClick: function (e) {
+      if (e.target.tagName === 'path') {
+        if (e.target.dataset.active === 'true') {
+          console.log('the zone id is ' + this.zone.id + ' the zone name is ' + this.zone.name)
+          this.getZone(e.target.dataset.name, this.zone.id, 0)
         }
-
       }
-      this.hideTooltip();
+      this.hideTooltip()
     },
-    showTooltip : function (evt, text) {
-      let tooltip = document.getElementById("tooltip");
-      tooltip.innerHTML = text;
-      tooltip.style.display = "block";
-      tooltip.style.left = evt.pageX + 10 + 'px';
-      tooltip.style.top = evt.pageY + 10 + 'px';
+    showTooltip: function (evt, text) {
+      const tooltip = document.getElementById('tooltip')
+      tooltip.innerHTML = text
+      tooltip.style.display = 'block'
+      tooltip.style.left = evt.pageX + 10 + 'px'
+      tooltip.style.top = evt.pageY + 10 + 'px'
     },
-    hideTooltip : function () {
-      var tooltip = document.getElementById("tooltip");
-      tooltip.style.display = "none";
+    hideTooltip: function () {
+      var tooltip = document.getElementById('tooltip')
+      tooltip.style.display = 'none'
     },
-    handleStateClickBtn : function (e) {
-      console.log(e);
-
+    handleStateClickBtn: function (e) {
+      console.log(e)
     },
-    init(){
+    init () {
       // this.svg_show = this.svg_camer;
     },
-    getZone : function (name, id){
-      if(name == null) {name = this.zone.mother.tag_name;}
+    getZone: function (name, id, isReturn) {
+      if (name == null) { name = this.zone.mother.tag_name }
 
-      var URL = '';
-      if(id === null){
-        URL = '/adminZone/fetch/specific?tag='+name
-      }else {
-        URL = '/adminZone/fetch/specific?tag='+name+'&key='+id;
+      var URL = ''
+      if (id === null) {
+        if (this.zone.mother != null) {
+          URL = '/adminZone/fetch/specific?tag=' + name + '&key=' + this.zone.mother.id + '&return=' + isReturn
+        } else {
+          URL = '/adminZone/fetch/specific?tag=' + name + '&return=' + isReturn
+        }
+      } else {
+        URL = '/adminZone/fetch/specific?tag=' + name + '&key=' + id + '&return=' + isReturn
       }
       axios.request({
-        url : URL,
-        method : 'GET',
-        baseURL : 'http://localhost:8000/api',
-        headers : {
+        url: URL,
+        method: 'GET',
+        baseURL: 'https://api.residat.com/api',
+        headers: {
           'Content-type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json'
         }
       }).then(response => {
-        console.log( response.data.data);
-        this.zone = response.data.data;
-        if(this.zone.has_data > 0){
-          this.display_chart = true;
-        }else {
-          this.display_chart = false;
+        console.log(response.data.data)
+        this.zone = response.data.data
+        if (this.zone.has_data > 0) {
+          this.display_chart = true
+        } else {
+          this.display_chart = false
         }
-
-
-        this.svg_show = (this.zone.vectors[0].svg);
-        this.vectors = (this.zone.vectors);
-        console.log(this.zone.mother);
-
-      }).catch(error => console.log(error));
+        this.region = this.zone.name
+        this.svg_show = (this.zone.vectors[0].svg)
+        this.vectors = (this.zone.vectors)
+        this.mapKeys = this.zone.vectors[0].map_keys
+        if (this.zone.mother !== null) {
+          this.show_return = true
+        } else {
+          this.show_return = false
+        }
+        console.log(this.zone.mother)
+      }).catch(error => console.log(error))
     }
   },
-  mounted() {
-    this.init();
-    console.log('axios about to be called');
+  mounted () {
+    this.init()
+    console.log('axios about to be called')
     axios.request({
-      url : '/adminZone/2e0f800c-0c62-4e3f-ac3c-b6e75fa7c223',
-      method : 'get',
-      baseURL : 'http://localhost:8000/api',
-      headers : {
+      url: '/adminZone/1',
+      method: 'get',
+      baseURL: 'https://api.residat.com/api',
+      headers: {
         'Content-type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer 40|AcpwdJpFz41c3jffCUM1NvzYg0lpVL19eWHwWXKu',
+        Accept: 'application/json',
+        Authorization: 'Bearer 40|AcpwdJpFz41c3jffCUM1NvzYg0lpVL19eWHwWXKu'
       }
     }).then(response => {
-      console.log("the response is there ");
-      let vals = response.data.data;
-      this.vectors = vals.vectors;
-      this.svg_show = (vals.vectors[0].svg);
-      this.zone = response.data.data;
-
-    }).catch(error => console.log(error)).finally(console.log("Called"));
+      console.log('the response is there ')
+      const vals = response.data.data
+      this.vectors = vals.vectors
+      this.svg_show = (vals.vectors[0].svg)
+      this.zone = response.data.data
+      this.mapKeys = this.zone.vectors[0].map_keys
+      if (this.zone.mother === null) {
+        this.show_return = false
+      } else {
+        this.show_retun = true
+      }
+      console.log('the Keys are '.this.mapKeys)
+    }).catch(error => console.log(error)).finally(console.log('Called'))
   },
   data: function () {
     return {
-      display_chart : false,
-      display_map : true,
-      zone : null,
-      vectors : [],
+      display_chart: false,
+      display_map: true,
+      zone: null,
+      vectors: [],
       options: {
         chart: {
           id: 'vuechart-example'
@@ -243,103 +314,107 @@ export default {
       optionDonuts: {},
       serieDonuts: [44, 55, 41, 17],
       color: '',
+      mapKeys: [],
       region: 'Cameroon',
+      show_return: false,
 
       show_items: [
-        {name : 'Far North' , color : '#c9f2d0'},
-        {name : 'North' , color : '#beffe8'},
-        {name : 'Adamawa' , color : '#e9ffbe'},
-        {name : 'Centre' , color : '#f7f2d2'},
-        {name : 'South' , color : '#cebff2'},
-        {name : 'East' , color : '#fcd6c5'},
-        {name : 'Littoral' , color : '#e8befe'},
-        {name : 'West' , color : '#defcc7'},
-        {name : 'South West' , color : '#dac6f5'},
-        {name : 'North West' , color : '#e9ffbe'},
+        { name: 'Far North', color: '#c9f2d0' },
+        { name: 'North', color: '#beffe8' },
+        { name: 'Adamawa', color: '#e9ffbe' },
+        { name: 'Centre', color: '#f7f2d2' },
+        { name: 'South', color: '#cebff2' },
+        { name: 'East', color: '#fcd6c5' },
+        { name: 'Littoral', color: '#e8befe' },
+        { name: 'West', color: '#defcc7' },
+        { name: 'South West', color: '#dac6f5' },
+        { name: 'North West', color: '#e9ffbe' }
       ],
 
       show_items_cmr: [
-        {name : 'Far North' , color : '#c9f2d0'},
-        {name : 'North' , color : '#beffe8'},
-        {name : 'Adamawa' , color : '#e9ffbe'},
-        {name : 'Centre' , color : '#f7f2d2'},
-        {name : 'East' , color : '#cebff2'},
-        {name : 'South' , color : '#fcd6c5'},
-        {name : 'Littoral' , color : '#e8befe'},
-        {name : 'West' , color : '#defcc7'},
-        {name : 'South West' , color : '#dac6f5'},
-        {name : 'North West' , color : '#e9ffbe'},
+        { name: 'Far North', color: '#c9f2d0' },
+        { name: 'North', color: '#beffe8' },
+        { name: 'Adamawa', color: '#e9ffbe' },
+        { name: 'Centre', color: '#f7f2d2' },
+        { name: 'East', color: '#cebff2' },
+        { name: 'South', color: '#fcd6c5' },
+        { name: 'Littoral', color: '#e8befe' },
+        { name: 'West', color: '#defcc7' },
+        { name: 'South West', color: '#dac6f5' },
+        { name: 'North West', color: '#e9ffbe' }
       ],
 
       show_items_far_north: [
-        {name : 'Logone - Et - Chari' , color : '#c6d496'},
-        {name : 'Diamaré' , color : '#8bbf8d'},
-        {name : 'Mayo-Danay' , color : '#9fc2d6'},
-        {name : 'Mayo-Kani' , color : '#c2bfa3'},
-        {name : 'Mayo-Tsanaga' , color : '#d19ba9'},
-        {name : 'Mayo-Sava' , color : '#c0b2d4'}
+        { name: 'Logone - Et - Chari', color: '#c6d496' },
+        { name: 'Diamaré', color: '#8bbf8d' },
+        { name: 'Mayo-Danay', color: '#9fc2d6' },
+        { name: 'Mayo-Kani', color: '#c2bfa3' },
+        { name: 'Mayo-Tsanaga', color: '#d19ba9' },
+        { name: 'Mayo-Sava', color: '#c0b2d4' }
       ],
 
       show_items_mayo_danay: [
-        {name : 'Datchéka Subdivision' , color : '#beffe7'},
-        {name : 'Gobo Subdivision' , color : '#c19ed7'},
-        {name : 'Guéré Subdivision' , color : '#ffbebe'},
-        {name : 'Kalfou Subdivision' , color : '#b2b2b2'},
-        {name : 'Kar Hay Subdivision' , color : '#d19ba9'},
-        {name : 'Kay Kay Subdivision' , color : '#ffffbe'},
-        {name : 'Maga Subdivision' , color : '#adf1b0'},
-        {name : 'Porhi Subdivision' , color : '#ffbee7'},
-        {name : 'Tchatibali Subdivision' , color : '#ffbebe'},
-        {name : 'Vélé Subdivision' , color : '#e9ffbe'},
-        {name : 'Wina Subdivision' , color : '#de9e66'},
-        {name : 'Yagoua Subdivision' , color : '#df72ff'}
+        { name: 'Datchéka Subdivision', color: '#beffe7' },
+        { name: 'Gobo Subdivision', color: '#c19ed7' },
+        { name: 'Guéré Subdivision', color: '#ffbebe' },
+        { name: 'Kalfou Subdivision', color: '#b2b2b2' },
+        { name: 'Kar Hay Subdivision', color: '#d19ba9' },
+        { name: 'Kay Kay Subdivision', color: '#ffffbe' },
+        { name: 'Maga Subdivision', color: '#adf1b0' },
+        { name: 'Porhi Subdivision', color: '#ffbee7' },
+        { name: 'Tchatibali Subdivision', color: '#ffbebe' },
+        { name: 'Vélé Subdivision', color: '#e9ffbe' },
+        { name: 'Wina Subdivision', color: '#de9e66' },
+        { name: 'Yagoua Subdivision', color: '#df72ff' }
       ],
 
-      svg_show : ``,
+      svg_show: '',
 
       seriesLine: [{
-        name: 'Website Blog',
-        type: 'column',
-        data: [440, 505, 414, 671]
-      }, {
-        name: 'Social Media',
-        type: 'line',
-        data: [23, 42, 35, 27]
+        name: 'Net Profit',
+        data: [44, 55, 57, 56]
       }],
       chartOptions: {
         chart: {
-          height: 350,
-          type: 'line',
+          type: 'bar',
+          height: 350
         },
-        stroke: {
-          width: [0, 4]
-        },
-        title: {
-          text: 'Traffic Sources'
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            endingShape: 'rounded'
+          }
         },
         dataLabels: {
-          enabled: true,
-          enabledOnSeries: [1]
+          enabled: true
         },
-        labels: ['01 Jan 2001', '02 Jan 2001', '03 Jan 2001', '04 Jan 2001',],
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+        },
         xaxis: {
-          type: 'datetime'
+          categories: ['Floods', 'Droughts', 'Land Slides', 'Bush Fires']
         },
-        yaxis: [{
+        yaxis: {
           title: {
-            text: 'Website Blog',
-          },
-
-        }, {
-          opposite: true,
-          title: {
-            text: 'Social Media'
+            text: '$ (thousands)'
           }
-        }]
+        },
+        fill: {
+          opacity: 1
+        },
+        tooltip: {
+          y: {
+            formatter: function (val) {
+              return '$ ' + val + ' thousands'
+            }
+          }
+        }
       },
-
       seriesHistogram: [{
-        data: [ 40, 28, 70, 68]
+        data: [40, 28, 70, 68]
       }],
       chartOptionsHistogram: {
         chart: {
@@ -353,7 +428,7 @@ export default {
             horizontal: true,
             dataLabels: {
               position: 'bottom'
-            },
+            }
           }
         },
         colors: ['#33b2df', '#546E7A', '#d4526e', '#13d8aa', '#A5978B', '#2b908f', '#f9a3a4', '#90ee7e',
@@ -366,7 +441,7 @@ export default {
             colors: ['#fff']
           },
           formatter: function (val, opt) {
-            return opt.w.globals.labels[opt.dataPointIndex] + ":  " + val
+            return opt.w.globals.labels[opt.dataPointIndex] + ':  ' + val
           },
           offsetX: 0,
           dropShadow: {
@@ -379,7 +454,7 @@ export default {
         },
         xaxis: {
           categories: ['Floods', 'Droughts', 'Land Slides', 'Bush Fires'
-          ],
+          ]
         },
         yaxis: {
           labels: {
@@ -393,7 +468,7 @@ export default {
         },
         subtitle: {
           text: 'Category Names as DataLabels inside bars',
-          align: 'center',
+          align: 'center'
         },
         tooltip: {
           theme: 'dark',
@@ -408,8 +483,7 @@ export default {
             }
           }
         }
-      },
-
+      }
 
     }
   }
@@ -446,5 +520,40 @@ export default {
   .active{
     stroke-width:  2px;
     fill: #42b983;
+  }
+
+  .map_content{
+    display: block; text-align: left; margin: 0; float: left; width: 65%
+  }
+
+  .data_display{
+    display: block; text-align: left; margin: 0;  float: right; width: 35%
+  }
+
+  .key{
+    display: inline-block; float: left; min-height: 100px; width: 20%; text-align: left
+  }
+
+  .map{
+    display: block; float: left; text-align: center; width: 80%;
+  }
+
+  @media only screen and (max-width:800px){
+    .map_content{
+      width: 100%
+    }
+
+    .data_display{
+      width: 100%
+    }
+
+    .key{
+      width: 100%;
+      text-align: center;
+    }
+
+    .map{
+      width: 100%;
+    }
   }
 </style>

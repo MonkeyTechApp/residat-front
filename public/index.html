@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+      <!--end::Fonts-->
+      <!--begin::Global Stylesheets Bundle(used by all pages)-->
+      <link href="assets/css/plugins.bundle.css" rel="stylesheet" type="text/css" />
+      <link href="assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
     <noscript>
@@ -13,5 +18,15 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <!--begin::Global Javascript Bundle(used by all pages)-->
+    <script src="assets/js/plugins.bundle.js"></script>
+    <script src="assets/js/scripts.bundle.js"></script>
+    <!--end::Global Javascript Bundle-->
+    <!--begin::Page Vendors Javascript(used by this page)-->
+    <script src="assets/js/fslightbox.bundle.js"></script>
+    <script src="assets/js/typedjs.bundle.js"></script>
+    <!--end::Page Vendors Javascript-->
+    <!--begin::Page Custom Javascript(used by this page)-->
+    <script src="assets/js/landing.js"></script>
   </body>
 </html>
