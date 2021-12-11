@@ -1,11 +1,16 @@
 <template>
-  <div >
-    <div style="height: 80px; width: 100%; background: white; margin: 0px; text-align: left">
-      <a v-if="show_return === true" href="#" style="padding-left: 20px; padding-top: 30px; float: left;" >
-        <img  @click="getZone(null, null,1)" height="20px" src="arrow.png"/></a>
-      <label style="font-family: 'Oswald'; padding-left: 20px; padding-top: 30px; font-size: 20px;
+  <div>
+<!--    Top Menu-->
+    <div style="height: 60px; width: 100%; background: white; margin: 0px; display: flex; justify-content: space-between; align-items: center">
+      <div style="display: flex; align-items: center">
+        <a v-if="show_return === true" href="#" style="padding-left: 20px;" >
+          <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+          <i @click="getZone(null, null,1)" class="fas fa-arrow-left fa-2x" style="color: black"></i>
+        </a>
+        <label style="font-family: 'Oswald'; padding-left: 20px; font-size: 20px;
         float: left">Residat - {{ region }}</label>
-      <ul style="float: right; list-style: none; vertical-align: middle; margin: 0; margin-top: 30px">
+      </div>
+      <ul style="float: right; list-style: none; vertical-align: middle; margin: 0;">
         <li><a href="#" style="text-decoration: none">Climatic Hazard</a></li>
         <li><a href="#" style="text-decoration: none">Location</a></li>
         <li><a href="#" style="text-decoration: none">Images</a></li>
@@ -13,12 +18,13 @@
         <li><a href="#" style="text-decoration: none">Contact</a></li>
       </ul>
     </div>
-    <div  class="map_content" >
 
+    <div  class="map_content" >
+<!--      Left Keys-->
       <div class="key" style="">
-        <ul style="display: inline-block; float: left">
+        <ul style="display: inline-block; float: left; margin-left: 20px;">
           <h4>Keys</h4>
-          <li v-for="item in this.mapKeys" :key="item.name" style="display: block; padding: 8px" >
+          <li v-for="item in this.mapKeys" :key="item.name" style="display: block; padding: 8px 1px" >
             <div  v-if="item.map_key_type_id === 1" style="width: 10px; display: inline-block;
              margin-right: 10px; height: 10px; " :style="{'background-color' : item.color }"></div>
             <div  v-if="item.map_key_type_id === 2 && item.map_key_size_id === 1"
@@ -43,12 +49,15 @@
 <!--        </div>-->
       </div>
 
-      <div class="map" style="" >
+<!--      Map loading-->
+      <div class="map">
         <ul>
           <li v-for="item in vectors" :key="item.type.name" style="display: block; padding: 8px">
-            <label style="font-size: 0.90em; display: block;
+<!--            Map title-->
+            <label style="font-size: 1.1em; display: block;
                   font-family: 'Montserrat SemiBold'">{{item.type.name}}</label>
             <div id="tooltip" display="none" style="position: absolute; display: none;"></div>
+<!--            Map-->
             <div v-if="item.graphic_type.id === 1"  style="text-align: center;  display: inline-block;"/>
               <inline-svg
                 :src="'http://localhost:8080/'+ item.path"
@@ -65,21 +74,7 @@
                 aria-label="item."
               ></inline-svg>
 <!--            <inline-svg-->
-<!--              :src="'https://residat.com/'+ item.path"-->
-<!--              viewBox="0 0 1000 1500"-->
-<!--              @mousemove="handleStateHover"-->
-<!--              @mouseout="handleStateLeave"-->
-<!--              @loaded="svgLoaded"-->
-<!--              @click="handleStateClick"-->
-<!--              @unloaded="svgUnloaded"-->
-<!--              @error="svgLoadError"-->
-<!--              width="100%"-->
-<!--              height="auto"-->
-<!--              fill="black"-->
-<!--              aria-label="item."-->
-<!--            ></inline-svg>-->
-<!--            <inline-svg-->
-<!--              src=""-->
+<!--              :src="'https://residat.com/'+item.path"-->
 <!--              viewBox="0 0 1000 1500"-->
 <!--              @mousemove="handleStateHover"-->
 <!--              @mouseout="handleStateLeave"-->
@@ -95,29 +90,43 @@
             <div v-if="item.graphic_type.id === 2" style="text-align: center; display: inline-block;">
               <img  style="width: 80%;" v-bind:src="'https://api.residat.com/'+ item.svg"/>
             </div>
-
           </li>
         </ul>
+        <!--        map carousel-->
+        <div v-if="display_chart === true" class="data_display" style="">
+          <div style="display: flex; width: 750px; overflow-x: scroll; margin-left: -610px">
+            <div v-for="img in images" :key="img">
+              <img src="../assets/KAY-KAY.png" width="160px" height="120px" alt="img">
+            </div>
+          </div>
+        </div>
       </div>
       <div style="clear: both"/>
     </div>
 
+<!--    last visible zone-->
     <div v-if="display_chart === true" class="data_display">
-      <b-container style="width: 90%; ">
-        <h4>Climate Degree of Impact</h4>
-        <apexchart style="" width="380" type="donut" :options="optionDonuts" :series="serieDonuts"></apexchart>
-        <h4>Climate Hazard Vulnerability Index</h4>
-        <apexchart type="bar" height="380" :options="chartOptionsHistogram" :series="seriesHistogram"></apexchart>
-        <h4>Climate Risk Threats</h4>
-        <apexchart type="bar" height="350" :options="chartOptions" :series="seriesLine"></apexchart>
+      <b-container style="width: 90%; justify-content: space-between; display: flex; flex-direction: column; gap: 50px; margin: 10px 1px">
+        <div>
+          <h4>Climate Degree of Impact</h4>
+          <apexchart width="350" type="donut" :options="optionDonuts" :series="serieDonuts"></apexchart>
+        </div>
+        <div>
+          <h4>Climate Hazard Vulnerability Index</h4>
+          <apexchart type="bar" height="350" :options="chartOptionsHistogram" :series="seriesHistogram"></apexchart>
+        </div>
+        <div>
+          <h4>Climate Risk Threats</h4>
+          <apexchart type="bar" height="320" :options="chartOptions" :series="seriesLine"></apexchart>
+        </div>
       </b-container>
 
       <div style="clear: both"></div>
     </div>
 
+    <!--    main chart right info sheet-->
     <div v-if="display_chart === false" class="data_display">
       <p style="text-align: justify; padding: 10px;">
-
         <label style="font-family: 'Montserrat SemiBold'">Residat </label>is an integrated Geospatial web service profiling climate hazards of vulnerable communities in Cameroon. It displays analyzed climate risks data in GIS format and provides climate hazard models that informs risk recommendations for community stakeholders. Its interactive maps serve both as dashboards for forecasting and visualizing updated community climate hazard models and as a data pool for community climate reality. Its integrated SMS and MMS (under development) platform allows subscribers to receive environmental notifications and climate hazard warnings while allowing the user to query visualized data for their subscribed local communities.  This platform is intended to serve as a reference for obtaining reliable community data (data based on administrative sub divisions) to address climate risk in Cameroon and possible beyond. We are prototyping in Mayo-Danay division of the Far North region, Wouri division in Littoral and Noun Division of the West Region of Cameroon. Key technologies involves GIS, Drones and Big data.
       </p>
       <div style="width: 50% ; min-height: 100px; background: #7bed9f; text-align: left; color: #000000; padding: 8px;
@@ -193,7 +202,7 @@ export default {
       console.log('svg loaded')
     },
     svgUnloaded: function (e) {
-      console.log('svg UNloaded')
+      console.log('svg notLoaded')
     },
     svgLoadError: function (e) {
       console.log('svg svgLoadError')
@@ -226,7 +235,6 @@ export default {
     },
     getZone: function (name, id, isReturn) {
       if (name == null) { name = this.zone.mother.tag_name }
-
       var URL = ''
       if (id === null) {
         if (this.zone.mother != null) {
@@ -295,6 +303,7 @@ export default {
   },
   data: function () {
     return {
+      images: ['1', '11', '13', '14', '11', '13', '14', '11', '13', '14', '11', '13', '14', '11', '13', '14', '11', '13', '14', '11', '13', '14', '11', '13', '14', '18'],
       display_chart: false,
       display_map: true,
       zone: null,
@@ -555,5 +564,26 @@ export default {
     .map{
       width: 100%;
     }
+  }
+
+  ::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 5px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: black;
+    border-radius: 10px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: gray;
   }
 </style>
